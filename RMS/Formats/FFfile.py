@@ -12,7 +12,8 @@ from RMS.Formats.FFbin import read as readFFbin
 from RMS.Formats.FFbin import write as writeFFbin
 from RMS.Formats.FFfits import read as readFFfits
 from RMS.Formats.FFfits import write as writeFFfits
-
+from RMS.Formats.FFstfits import read as readFFstfits
+from RMS.Formats.FFstfits import write as writeFFstfits
 
 
 def read(directory, filename, fmt=None, array=False):
@@ -72,6 +73,12 @@ def read(directory, filename, fmt=None, array=False):
         # Read the file as FITS
         ff = readFFfits(directory, filename, array=array)
 
+    elif fmt == 'sffits':
+
+        # Read the file as STFITS
+        ff = readFFstfits(directory, filename, array=array)
+
+        
     else:
         ff = None
 
@@ -118,6 +125,9 @@ def write(ff, directory, filename, fmt=None):
 
     elif fmt == 'fits':
         writeFFfits(ff, directory, filename)
+
+    elif fmt == 'stfits':
+        writeFFstfits(ff, directory, filename)
 
 
 

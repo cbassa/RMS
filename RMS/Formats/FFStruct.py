@@ -12,14 +12,17 @@ class FFStruct:
         self.nbits = 0
         self.first = 0
         self.camno = None
-
+        
         self.nframes = -1
         self.fps = -1
+        self.mjd = -1
+        self.nfd = None
         
         self.maxpixel = None
         self.maxframe = None
         self.avepixel = None
         self.stdpixel = None
+        self.dt = None
         
         self.array = None
 
