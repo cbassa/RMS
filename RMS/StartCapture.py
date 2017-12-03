@@ -204,11 +204,15 @@ def runCapture(config, duration=None, video_file=None, nodetect=False, upload_ma
     sharedArrayBase = multiprocessing.Array(ctypes.c_uint8, 256*(config.width + array_pad)*(config.height + array_pad))
     sharedArray = np.ctypeslib.as_array(sharedArrayBase.get_obj())
     sharedArray = sharedArray.reshape(256, (config.height + array_pad), (config.width + array_pad))
+    timeArrayBase = multiprocessing.Array(ctypes.c_double, 256)
+    timeArray = np.ctypeslib.as_array(timeArrayBase.get_obj())
     startTime = multiprocessing.Value('d', 0.0)
     
     sharedArrayBase2 = multiprocessing.Array(ctypes.c_uint8, 256*(config.width + array_pad)*(config.height + array_pad))
     sharedArray2 = np.ctypeslib.as_array(sharedArrayBase2.get_obj())
     sharedArray2 = sharedArray2.reshape(256, (config.height + array_pad), (config.width + array_pad))
+    timeArrayBase2 = multiprocessing.Array(ctypes.c_double, 256)
+    timeArray2 = np.ctypeslib.as_array(timeArrayBase2.get_obj())
     startTime2 = multiprocessing.Value('d', 0.0)
 
 
@@ -223,13 +227,13 @@ def runCapture(config, duration=None, video_file=None, nodetect=False, upload_ma
 
     
     # Initialize buffered capture
-    bc = BufferedCapture(sharedArray, startTime, sharedArray2, startTime2, config, video_file=video_file)
+    bc = BufferedCapture(sharedArray, timeArray, startTime, sharedArray2, timeArray2, startTime2, config, video_file=video_file)
 
     # Initialize the live image viewer
     live_view = LiveViewer(window_name='Maxpixel')
     
     # Initialize compression
-    compressor = Compressor(night_data_dir, sharedArray, startTime, sharedArray2, startTime2, config, 
+    compressor = Compressor(night_data_dir, sharedArray, timeArray, startTime, sharedArray2, timeArray2, startTime2, config, 
         detector=detector, live_view=live_view, flat_struct=flat_struct)
 
     

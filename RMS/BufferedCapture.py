@@ -29,13 +29,15 @@ class BufferedCapture(Process):
     
     running = False
     
-    def __init__(self, array1, startTime1, array2, startTime2, config, video_file=None):
+    def __init__(self, array1, timearray1, startTime1, array2, timearray2, startTime2, config, video_file=None):
         """ Populate arrays with (startTime, frames) after startCapture is called.
         
         Arguments:
             array1: numpy array in shared memory that is going to be filled with frames
+            timearray1: numpy array in shared memory containing time stamps
             startTime1: float in shared memory that holds time of first frame in array1
             array2: second numpy array in shared memory
+            timearray2: second numpy array in shared memory containing time stamps
             startTime2: float in shared memory that holds time of first frame in array2
 
         Keyword arguments:
@@ -45,8 +47,10 @@ class BufferedCapture(Process):
         
         super(BufferedCapture, self).__init__()
         self.array1 = array1
+        self.timearray1 = timearray1
         self.startTime1 = startTime1
         self.array2 = array2
+        self.timearray2 = timearray2
         self.startTime2 = startTime2
         
         self.startTime1.value = 0
@@ -191,8 +195,10 @@ class BufferedCapture(Process):
 
                 if first:
                     self.array1[i, :gray.shape[0], :gray.shape[1]] = gray
+                    self.timearray1[i] = t
                 else:
                     self.array2[i, :gray.shape[0], :gray.shape[1]] = gray
+                    self.timearray2[i] = t
 
 
                 # If video is loaded from a file, simulate real FPS

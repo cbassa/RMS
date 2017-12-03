@@ -47,7 +47,7 @@ class Compressor(multiprocessing.Process):
 
     running = False
     
-    def __init__(self, data_dir, array1, startTime1, array2, startTime2, config, detector=None, 
+    def __init__(self, data_dir, array1, timearray1, startTime1, array2, timearray2, startTime2, config, detector=None, 
         live_view=None, flat_struct=None):
         """
 
@@ -71,8 +71,10 @@ class Compressor(multiprocessing.Process):
         
         self.data_dir = data_dir
         self.array1 = array1
+        self.timearray1 = timearray1
         self.startTime1 = startTime1
         self.array2 = array2
+        self.timearray2 = timearray2
         self.startTime2 = startTime2
         self.config = config
 
@@ -108,7 +110,7 @@ class Compressor(multiprocessing.Process):
     
 
 
-    def saveFF(self, arr, startTime, N):
+    def saveFF(self, arr, timearray, startTime, N):
         """ Write metadata and data array to FF file.
         
         Arguments:
@@ -117,12 +119,13 @@ class Compressor(multiprocessing.Process):
             N: [int] frame counter (ie. 0000512)
         """
         
-        # Generate the name for the file
-        date_string = time.strftime("%Y%m%d_%H%M%S", time.gmtime(startTime))
-
         # Calculate miliseconds
         millis = int((startTime - floor(startTime))*1000)
-        
+
+        # Generate the name for the file
+        date_string = time.strftime("%Y%m%d_%H%M%S", time.gmtime(startTime))
+        nfd = "%s.%03d"%(time.strftime("%Y-%m-%dT%T", time.gmtime(startTime)), millis)
+
 
         filename = str(self.config.stationID).zfill(3) +  "_" + date_string + "_" + str(millis).zfill(3) \
             + "_" + str(N).zfill(7)
@@ -132,8 +135,13 @@ class Compressor(multiprocessing.Process):
         ff.nrows = arr.shape[1]
         ff.ncols = arr.shape[2]
         ff.nbits = self.config.bit_depth
+        ff.nframes = 256
         ff.first = N + 256
         ff.camno = self.config.stationID
+        ff.fps = self.config.fps
+        ff.nfd = nfd
+        ff.mjd = 0.0
+        ff.dt = timearray-timearray[0]
         
         # Write the FF file
         FFfile.write(ff, self.data_dir, filename, fmt=self.config.ff_format)
@@ -218,7 +226,8 @@ class Compressor(multiprocessing.Process):
                 startTime = self.startTime1.value 
 
                 # Copy frames
-                frames = self.array1 
+                frames = self.array1
+                dt = self.timearray1
                 self.startTime1.value = 0
 
             else:
@@ -227,7 +236,8 @@ class Compressor(multiprocessing.Process):
                 startTime = self.startTime2.value 
 
                 # Copy frames
-                frames = self.array2 
+                frames = self.array2
+                dt = self.timearray2
                 self.startTime2.value = 0
 
             
@@ -244,7 +254,7 @@ class Compressor(multiprocessing.Process):
             t = time.time()
             
             # Save the compressed image
-            filename = self.saveFF(compressed, startTime, n*256)
+            filename = self.saveFF(compressed, dt, startTime, n*256)
             n += 1
             
             log.debug("saving: " + str(time.time() - t) + "s")
