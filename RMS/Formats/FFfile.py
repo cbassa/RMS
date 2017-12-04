@@ -68,12 +68,12 @@ def read(directory, filename, fmt=None, array=False):
         ff = readFFbin(directory, filename, array=array)
 
 
-    elif fmt == 'fits':
+    elif fmt == 'stfits':
 
         # Read the file as FITS
         ff = readFFfits(directory, filename, array=array)
 
-    elif fmt == 'sffits':
+    elif fmt == 'fits':
 
         # Read the file as STFITS
         ff = readFFstfits(directory, filename, array=array)
@@ -123,10 +123,10 @@ def write(ff, directory, filename, fmt=None):
     if fmt == 'bin':
         writeFFbin(ff, directory, filename)
 
-    elif fmt == 'fits':
+    elif fmt == 'stfits':
         writeFFfits(ff, directory, filename)
 
-    elif fmt == 'stfits':
+    elif fmt == 'fits':
         writeFFstfits(ff, directory, filename)
 
 

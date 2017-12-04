@@ -27,6 +27,8 @@ from RMS.VideoExtraction import Extractor
 from RMS.Formats import FFfile, FFStruct
 from RMS.Formats import FieldIntensities
 
+from astropy.time import Time
+
 # Import Cython functions
 import pyximport
 pyximport.install(setup_args={'include_dirs':[np.get_include()]})
@@ -124,8 +126,10 @@ class Compressor(multiprocessing.Process):
 
         # Generate the name for the file
         date_string = time.strftime("%Y%m%d_%H%M%S", time.gmtime(startTime))
-        nfd = "%s.%03d"%(time.strftime("%Y-%m-%dT%T", time.gmtime(startTime)), millis)
 
+        # Generate time instances
+        nfd = "%s.%03d"%(time.strftime("%Y-%m-%dT%T", time.gmtime(startTime)), millis)
+        t=Time(nfd,format='isot',scale='utc')
 
         filename = str(self.config.stationID).zfill(3) +  "_" + date_string + "_" + str(millis).zfill(3) \
             + "_" + str(N).zfill(7)
@@ -140,7 +144,7 @@ class Compressor(multiprocessing.Process):
         ff.camno = self.config.stationID
         ff.fps = self.config.fps
         ff.nfd = nfd
-        ff.mjd = 0.0
+        ff.mjd = t.mjd
         ff.dt = timearray-timearray[0]
         
         # Write the FF file
@@ -271,7 +275,6 @@ class Compressor(multiprocessing.Process):
             # Fully format the filename (this could not have been done before as the extractor will add
             # the FR prefix)
             filename = "FF_" + filename + "." + self.config.ff_format
-
 
             log.debug('Extractor started for: ' + filename)
 
